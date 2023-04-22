@@ -1,6 +1,6 @@
 import sqlite3
 import getpass
-import random
+import uuid
 import os
 
 
@@ -18,3 +18,9 @@ class User:
         #setter = age
         def setAge(self, UsrAge):
                 self.UsrAge = UsrAge
+
+        def getAge(self):
+                return self.UsrAge
+
+        def RandId(self):
+                print 
