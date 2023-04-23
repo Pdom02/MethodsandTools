@@ -5,16 +5,71 @@ import os
 def clear():
     os.system('cls')
 
+def create_table(conn, create_table_sql):
+    
+    """create a table from the create_table_sql statement
+    :param conn: Connection object
+    :param create_table_sql: a CREATE TABLE statement
+    :return:
+    """
+    try:
+        c = conn.cursor()
+        c.execute(create_table_sql)
+    except RuntimeError as e:
+        print(e)
+
+def setup_db():
+    database = r"C:\\Users\\Phillip Dominguez\\Desktop\\methods_tools\\MethodsandTools\\methods\\buyerschoice.db"
+
+    sql_create_customer_table = """ CREATE TABLE IF NOT EXISTS customer (
+                                    firstname text,
+                                    lastname text,
+                                    username text,
+                                    password text,
+                                    address	text,
+                                    customerID integer PRIMARY KEY,
+                                    email text,
+                                    payHis integer,
+                                    orderHis integer,
+                                    order_info integer,
+                                    payinfo	text
+                                );"""
+    sql_create_item_table = """ CREATE TABLE IF NOT EXISTS listing (
+                                itemName text,
+	                            itemID	integer PRIMARY KEY,
+	                            itemDesc text,
+	                            itemPrice numeric,
+	                            itemStock integer,
+	                            itemCategory integer
+                            );"""
+    
+    sql_create_cart_table = """ CREATE TABLE IF NOT EXISTS cart (
+                                    cartID integer PRIMARY KEY,
+                                    itemID integer listing,
+                                    quantity integer,
+                                    FOREIGN KEY (itemID) REFERENCES listing(itemID)
+                            );"""
+    
+    connection = sqlite3.connect("buyerschoice.db")
+
+    if connection is not None:
+        #creates customer table
+        create_table(connection, sql_create_customer_table)
+        #creates listing table
+        create_table(connection, sql_create_item_table)
+        #creates cart table
+        create_table(connection, sql_create_cart_table)
 
 def main_loop():
+    setup_db()
     connection = sqlite3.connect("buyerschoice.db")
     cursor = connection.cursor()
-    print("Welcome to buyers choice!\n")
-    print("1. Login")
-    print("2. Register")
-    check1 = input("Type one of the numbers: ")
     quit = 0
     while(1):
+        print("Welcome to buyers choice!\n")
+        print("1. Login")
+        print("2. Register")
+        check1 = input("Type one of the numbers: ")
         if check1 == "1":
             clear()
             username = input("Username: ")
