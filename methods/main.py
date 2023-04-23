@@ -3,7 +3,11 @@ import getpass
 import os
 
 def clear():
-    os.system('clear')
+    if os.name == 'nt':
+        os.system('cls')
+    else:
+        os.system('clear')
+
 
 def create_table(conn, create_table_sql):
     
@@ -91,10 +95,13 @@ def main_loop():
                     result = email.fetchone()
                     address = cursor.execute("SELECT address FROM Customer WHERE username = ? AND password = ?", (username, password))
                     result2 = address.fetchone()
+                    payinfo = cursor.execute("SELECT payinfo FROM Customer WHERE username = ? AND password = ?", (username, password))
+                    result3 = payinfo.fetchone()
                     print("Current Username: " + username)
                     print("Password: ********")
                     print(f"Address: {result2!r}")
                     print(f"Email Address: {result!r} ")
+                    print(f"Payment Information: {result3!r} ")
                 if check2 == "2":
                     itemName = input("Item Name: ")
                     itemDesc = input("Itme Description: ")
