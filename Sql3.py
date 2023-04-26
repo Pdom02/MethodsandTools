@@ -4,22 +4,35 @@ import random
 import sys
 import os
 
-
+connection = sqlite3.connect("C:\\Users\\dalen\\OneDrive\\Documents\\GitHub\\MethodsandTools\\MethodsandTools\\Customer\\Customer.db")
 
 class User:
         #constructor
         def __init__ (self):
-                self.UsrAge = 0
-                #self.UsrName = ""
+                
+                self.UsrName = ""
+                self.Pass = ""
                 self.UsrFname = ""
                 self.UsrLname = ""
-
+                self.UsrAge = 0
                 self.address = ""
-                #self.shpaddy = ""
+                self.shpaddy = ""
                 self.email = ""
 
                 self.UsrID =  0
 
+        # USERNAME AND PASSWROD
+        def setUsrname(self, UsrName):
+                self.UsrName = UsrName
+
+        def setPass(self, Pass):
+                self.Pass = Pass
+        
+        def getUsrname(self):
+                return self.UsrName
+
+        def getPass(self):
+                return self.Pass
 
         #USER AGE
         def setAge(self, UsrAge):
@@ -36,20 +49,33 @@ class User:
                 return self.UsrID
         
         #USER NAME (FRIST AND LAST)
-        def setName(self, UsrFname, UsrLname):
+        def setFName(self, UsrFname):
                 self.UsrFname = UsrFname
+
+        def getFName(self):
+                return self.UsrFname
+        
+        def setLName(self, UsrLname):
+
                 self.UsrLname = UsrLname
 
-        def getName(self):
-                return self.UsrFname, self.UsrLname
-        
+        def getLName(self):
+                return self.UsrLname
+
         #USER ADDRESS
         def setAddy(self, address):
                 self.address = address
         
         def getAddy(self):
                 return self.address
-
+        
+        #USER SADDRESS
+        def setShpAddy(self, shpaddy):
+                self.shpaddy = shpaddy
+        
+        def getShpAddy(self):
+                return self.shpaddy
+        
         #EMAIL
         def setEmail(self,email):
                 self.email = email
@@ -57,76 +83,105 @@ class User:
         def getEmail(self):
                 return self.email
         
-        '''  #SHIP ADDRESS
-        def setShipAd(self, shpaddy):
-                self.shpaddy = shpaddy
+
+
+        #Controls all of the communication with the database<3
+        def register(self):
+                username = input("Please enter your Username: ")
+                custmr.setUsrname(username)
+                password = getpass.getpass("Please enter your Password: ")
+                custmr.setPass(password)
+                Fname = input("Please enter your First name: ")
+                Lname = input("Please enter your Last name: ")
+                custmr.setFName(Fname)
+                custmr.setLName(Lname)
+                age = input("Please enter your age: ")
+                custmr.setAge(age)
+                addy =  input("Enter your address: ")
+                custmr.setAddy(addy)
+                custmr.setShpAddy(addy)
+                email =  input("Enter your email: ")
+                custmr.setEmail(email)
+                namepkg = (custmr.getUsrname(), custmr.getPass(), custmr.getFName(),custmr.getLName(), custmr.getAge(), custmr.getAddy(), custmr.getEmail(), custmr.getShpAddy())
+                cursor = connection.cursor()
+                query = ("INSERT INTO customer (Username, Password, Firstname, Lastname, Age, Address, Email, ShippingAddress) VALUES (?,?,?,?,?,?,?,?)")
+                cursor.execute(query,namepkg)
+                connection.commit()
         
-        def getShipAd(self):
-                return self.shpaddy'''
+        def update(self,updatepkg):
+                print("Reviewing the UPDATED information:")
+                print(updatepkg)
+                review = input("Is the information correct? Y or N ")
+                if review == 'Y':
+                      query = ("UPDATE customer SET Firstname = ? ,  Lastname =?,  Age = ?, Address = ?, Email = ?, ShippingAddress = ? WHERE Username = ?") 
+                      cursor.execute(query,updatepkg)
         
+        def PersInfo(self):
+                
+                Fname = input("Please enter your First name: ")
+                Lname = input("Please enter your Last name: ")
+                custmr.setFName(Fname)
+                custmr.setLName(Lname)
+                age = input("Please enter your age: ")
+                custmr.setAge(age)
+                addy =  input("Enter your address: ")
+                custmr.setAddy(addy)
+                custmr.setShpAddy(addy)
+                email =  input("Enter your email: ")
+                custmr.setEmail(email)
+                namepkg = ( custmr.getName(), custmr.getAge(), custmr.getAddy(), custmr.getEmail(), custmr.getShpAddy())
+                return namepkg                
+        
+        def login(self):
+                username = input("Please enter your Username: ")
+                custmr.setUsrname(username)
+                password = getpass.getpass("Please enter your Password: ")
+                custmr.setPass(password)
+                try:
+                        cursor.execute("SELECT * FROM Customer WHERE username = ? AND password = ?", (username, password))
+                        print("Accepted")
+                except:
+                        print("Wrong username or password...")
+                
+               
 
 custmr = User()
 
 quit = 1
 while(quit != 0):
+        cursor = connection.cursor()
         print("User Choices:\n")
-        print("1: Add Name")
-        print("2: Add Age")
-        print("3: Add Address") #Assuming that the shipping address and the address are the same
-       # print("4: Add Shipping Address")
-        print("4: Add Email")
-        print("5: Review")
-        print("6: Quit")
+        print("1: Register")
+        print("2: View Table")
+        print("3: Update")
+        print("4: Login")
+        print("5: Quit")
         urs = input("What is your choice? ")
         if urs == "1":
-                Fname = input("Please enter you First name: ")
-                Lname = input("Please enter you Last name: ")
-                custmr.setName(Fname, Lname)      
-                print("The name is", custmr.getName())
+                custmr.register()
+                cursor.execute("SELECT * FROM customer")
+                print(cursor.fetchall())
+                connection.commit()
         elif urs == "2":
-                age = input("Please enter your age: ")
-                custmr.setAge(age)
-                print("Your Age is: ", custmr.getAge())         
-        elif urs == "3":
-                addy =  input("Enter your address: ")
-                custmr.setAddy(addy)
-                print("You address is: ", custmr.getAddy())
-        elif urs == "4":
-                email =  input("Enter your email: ")
-                custmr.setEmail(email)
-                print("You email address is: ", custmr.getEmail())
-        elif urs == "5":
-              print("Review Data:")
-              print("First name: ", Fname)
-              print("Last name: ", Lname)
-              print("Age: ", age )
-              print("Email: ", email)
-              print("Address: ", addy)
-              
-              review = input("Is the information correct? Y or N ")
-              if review == 'Y':
-                      namepkg = (Fname, Lname, age, email, addy)
-                      query = ("INSERT INTO Customer (Firstname, Lastname, Age, Address, Email) VALUES (?,?,?,?,?)") 
-                      cursor.execute(query,namepkg)
-                      
-              else:
-                        break
-                      
-                      
-        elif urs == "6":
-                try:
-                        connection = sqlite3.connect("Customer.db")
-                        print("Successful connection.")
-
-                except:
-                        print("Failed connection.")
-
-                        ## exits the program if unsuccessful
-                        sys.exit()
-
-
                 cursor = connection.cursor()
-                query = ("INSERT INTO customer (Firstname, Lastname, Age, Address, Email) VALUES (?,?,?,?,?)") 
-                namepkg = ('Theo', 'Angeles', '12', '123 Simone Ln', 'ta@gmail.com')
-                cursor.execute(query,namepkg)
-                        
+                cursor.execute("SELECT * FROM customer")
+                print(cursor.fetchall())
+                connection.commit()
+        elif urs == "3":
+                #Once it logs in check else register
+                #In separete menu it can update stuff
+
+                ##connection = sqlite3.connect("C:\\Users\\dalen\\OneDrive\\Documents\\GitHub\\MethodsandTools\\MethodsandTools\\Customer\\Customer.db")
+                
+                Username = "theo12"
+                updatepkg = ('Leo', 'Troy', '220', '123 Simone Strt', 'tasd@gmail.com', 'POBOX 13321', Username)
+                custmr.update(updatepkg)
+                cursor.execute("SELECT * FROM customer")
+                print(cursor.fetchall())
+                connection.commit()#  
+        elif urs == "4":
+                custmr.login()
+        elif urs == "5":
+                break
+
+SystemExit
