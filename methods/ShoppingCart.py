@@ -47,8 +47,17 @@ class ShoppingCart:
             print: x.name ; x.price
             print ("\n")
 
-    #def updateQuantity(self):   
-       
+    def updateQuantity(self):
+        b = int(input("What do you want to update the quantity to? "))
+        if (b):
+            con=sqlite3.connect("cart.db")
+            c=con.cursor()
+            c.execute('UPDATE product SET pQty= ?',(b))
+            con.commit()
+            c.close()
+        
+        else:
+            print("Please give correct input")
     
     def totalPrice(self):
         price = 0
