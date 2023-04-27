@@ -1,6 +1,8 @@
 import sqlite3
 import getpass
 import os
+from user_class import User
+from Item_class import Item
 
 def clear():
     if os.name == 'nt':
@@ -36,7 +38,8 @@ def setup_db():
                                     payHis integer,
                                     orderHis integer,
                                     order_info integer,
-                                    payinfo	text
+                                    payinfo	text,
+                                    shippingaddress text
                                 );"""
     sql_create_item_table = """ CREATE TABLE IF NOT EXISTS listing (
                                 itemName text,
@@ -68,6 +71,7 @@ def main_loop():
     setup_db()
     connection = sqlite3.connect("buyerschoice.db")
     cursor = connection.cursor()
+    fella = User(connection)
     quit = 0
     while(1):
         print("Welcome to buyers choice!\n")
@@ -76,44 +80,29 @@ def main_loop():
         check1 = input("Type one of the numbers: ")
         if check1 == "1":
             clear()
-            username = input("Username: ")
-            password = getpass.getpass("Password: ")
-            try:
-                cursor.execute("SELECT * FROM Customer WHERE username = ? AND password = ?", (username, password))
-            except:
-                print("Wrong username or password...")
+            fella.login(cursor)
             clear()
             while(quit != 1):
-                print("Welcome "  + username)
+                print("Welcome "  + fella.getUsrname())
                 print("1. Update Profile content")
-                print("2, Add Listing")
                 print("3. Search Listings")
                 print("4. Logout")
                 check2 = input("Type one of the numbers: ")
                 if check2 == "1":
-                    email = cursor.execute("SELECT email FROM Customer WHERE username = ? AND password = ?", (username, password))
+                    email = cursor.execute("SELECT email FROM Customer WHERE username = ? AND password = ?", (fella.getUsrname(), fella.getPass()))
                     result = email.fetchone()
-                    address = cursor.execute("SELECT address FROM Customer WHERE username = ? AND password = ?", (username, password))
+                    address = cursor.execute("SELECT address FROM Customer WHERE username = ? AND password = ?", (fella.getUsrname(), fella.getPass()))
                     result2 = address.fetchone()
-                    payinfo = cursor.execute("SELECT payinfo FROM Customer WHERE username = ? AND password = ?", (username, password))
+                    payinfo = cursor.execute("SELECT payinfo FROM Customer WHERE username = ? AND password = ?", (fella.getUsrname(), fella.getPass()))
                     result3 = payinfo.fetchone()
-                    print("Current Username: " + username)
+                    print("Current Username: " + fella.getUsrname())
                     print("Password: ********")
                     print(f"Address: {result2!r}")
                     print(f"Email Address: {result!r} ")
                     print(f"Payment Information: {result3!r} ")
-                if check2 == "2":
-                    itemName = input("Item Name: ")
-                    itemDesc = input("Itme Description: ")
-                    itemPrice = float(input("Price: $"))
-                    itemStock = int(input("Stock: "))
-                    itemCategory = input("Category: ")
-                    datapkg = (itemName, itemDesc, itemPrice, itemStock, itemCategory)
-                    cursor.execute("INSERT INTO Listings(itemName, itemDesc, itemPrice, itemStock, itemCategory) VALUES(?, ?, ?, ?, ?)", datapkg)
-                    connection.commit()
                 if check2 == "3":
                     listingname = input("Search for an item listing: ")
-                    cursor.execute("SELECT * FROM Listings WHERE itemName = ?", (listingname, ))
+                    cursor.execute("SELECT * FROM Listings WHERE itemName = ?", (listingname))
                     rows = cursor.fetchall()
 
                     if len(rows) == 0:
@@ -131,17 +120,7 @@ def main_loop():
                     break
 
         elif check1 == "2":
-            print("Registration")
-            username = input("Username: ")
-            password = getpass.getpass("Password: ")
-            firstname = input("First name: ")
-            lastname = input("Last name: ")
-            address = input("Address: ")
-            email = input("Email: ")
-            datapkg = (firstname, lastname, username, password, address, email)
-            cursor.execute("INSERT INTO Customer(firstname, lastname, username, password, address, email) VALUES(?, ?, ?, ?, ?, ?)", datapkg)
-            connection.commit()
-            check1 = "1"
+            fella.register(connection)
 
 
 
