@@ -4,7 +4,7 @@ import random
 import sys
 import os
 
-connection = sqlite3.connect("C:\\Users\\Phillip Dominguez\\Desktop\\methods_tools\\MethodsandTools\\methods\\buyerschoice.db")
+connection = sqlite3.connect("C:\\Users\\dalen\\OneDrive\\Documents\\GitHub\\MethodsandTools\\MethodsandTools\\Customer\\Customer.db")
 
 class User:
         #constructor
@@ -14,10 +14,10 @@ class User:
                 self.Pass = ""
                 self.UsrFname = ""
                 self.UsrLname = ""
-                self.UsrAge = 0
                 self.address = ""
                 self.shpaddy = ""
                 self.email = ""
+                self.payhistory = ""
 
                 self.UsrID =  0
 
@@ -33,7 +33,7 @@ class User:
 
         def getPass(self):
                 return self.Pass
-
+        
         #USER ID
         def setID(self, UsrID):
                 self.UsrID = UsrID #Generate the user Id in the main when they pick the register
@@ -76,6 +76,13 @@ class User:
         def getEmail(self):
                 return self.email
         
+        #Payhistory
+        def setpayhis(self, payhistory):
+                self.payhistory
+        
+        def getpayhis(self):
+                return self.payhistory
+        
 
 
         #Controls all of the communication with the database<3
@@ -95,7 +102,7 @@ class User:
                 custmr.setEmail(email)
                 namepkg = (custmr.getUsrname(), custmr.getPass(), custmr.getFName(),custmr.getLName(), custmr.getAddy(), custmr.getEmail(), custmr.getShpAddy())
                 cursor = connection.cursor()
-                query = ("INSERT INTO customer (Username, Password, Firstname, Lastname, Address, Email, ShippingAddress) VALUES (?,?,?,?,?,?,?)")
+                query = ("INSERT INTO customer (Username, Password, Firstname, Lastname, Age, Address, Email, ShippingAddress) VALUES (?,?,?,?,?,?,?,?)")
                 cursor.execute(query,namepkg)
                 connection.commit()
         
@@ -118,7 +125,7 @@ class User:
                 custmr.setShpAddy(addy)
                 email =  input("Enter your email: ")
                 custmr.setEmail(email)
-                namepkg = ( custmr.getAddy(), custmr.getEmail(), custmr.getShpAddy())
+                namepkg = (custmr.getName(), custmr.getAddy(), custmr.getEmail(), custmr.getShpAddy())
                 return namepkg                
         
         def login(self):
@@ -131,6 +138,37 @@ class User:
                         print("Accepted")
                 except:
                         print("Wrong username or password...")
+
+
+        def editHistory(self):
+                print("EDITING: ")
+                print("1: Shipping Address")
+                print("2: Payment History")
+                update = input("Which one do you want to update?")
+                if update == "1":
+                        shippingadd = input("Please enter your new shipping address:")
+                        custmr.setShpAddy(shippingadd)
+                        username = custmr.getUsrname()
+                        shppkg = (shippingadd, username)
+                        print(shippingadd)
+                        review = input("Is the information correct? Y or N ")
+                        if review == 'Y':
+                                query = ("UPDATE customer SET ShippingAddress = ? WHERE Username = ?")
+                                cursor.execute(query, shppkg )
+                                connection.commit()
+               
+                elif update == "2":
+                        payhis = input("Please enter your new shipping address:")
+                        custmr.setpayhis(payhis)
+                        username = custmr.getUsrname()
+                        paypkg = (payhis, username)
+                        print(payhis)
+                        review = input("Is the information correct? Y or N ")
+                        if review == 'Y':
+                                query = ("UPDATE customer SET PaymentHistory = ? WHERE Username = ?")
+                                cursor.execute(query, paypkg )
+                                connection.commit()
+                        
                 
                
 
@@ -142,9 +180,10 @@ while(quit != 0):
         print("User Choices:\n")
         print("1: Register")
         print("2: View Table")
-        print("3: Update")
-        print("4: Login")
-        print("5: Quit")
+        print("3: Update Personal Info")
+        print("4: Update Payment Info")
+        print("5: Login")
+        print("6: Quit")
         urs = input("What is your choice? ")
         if urs == "1":
                 custmr.register()
@@ -163,14 +202,18 @@ while(quit != 0):
                 ##connection = sqlite3.connect("C:\\Users\\dalen\\OneDrive\\Documents\\GitHub\\MethodsandTools\\MethodsandTools\\Customer\\Customer.db")
                 
                 Username = "theo12"
-                updatepkg = ('Leo', 'Troy', '220', '123 Simone Strt', 'tasd@gmail.com', 'POBOX 13321', Username)
+                updatepkg = ('Leo', 'Troy', '123 Simone Strt', 'tasd@gmail.com', 'POBOX 13321', Username)
                 custmr.update(updatepkg)
                 cursor.execute("SELECT * FROM customer")
                 print(cursor.fetchall())
                 connection.commit()#  
         elif urs == "4":
-                custmr.login()
+              custmr.editHistory()  
         elif urs == "5":
+                custmr.login()
+        elif urs == "6":
                 break
+
+                
 
 SystemExit
