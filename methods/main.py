@@ -3,6 +3,7 @@ import getpass
 import os
 from user_class import User
 from Item_class import Item
+from cart_class import ShoppingCart
 
 def clear():
     if os.name == 'nt':
@@ -41,7 +42,7 @@ def setup_db():
                                     payinfo	text,
                                     shippingaddress text
                                 );"""
-    sql_create_item_table = """ CREATE TABLE IF NOT EXISTS listing (
+    sql_create_item_table = """ CREATE TABLE IF NOT EXISTS items (
                                 itemName text,
 	                            itemID	integer PRIMARY KEY,
 	                            itemDesc text,
@@ -72,11 +73,14 @@ def main_loop():
     connection = sqlite3.connect("buyerschoice.db")
     cursor = connection.cursor()
     fella = User(connection)
+    cart = ShoppingCart(connection)
+
     quit = 0
     while(1):
         print("Welcome to buyers choice!\n")
         print("1. Login")
         print("2. Register")
+        print("3. Exit")
         check1 = input("Type one of the numbers: ")
         if check1 == "1":
             clear()
@@ -85,6 +89,7 @@ def main_loop():
             while(quit != 1):
                 print("Welcome "  + fella.getUsrname())
                 print("1. Update Profile content")
+                print("2. Show listings")
                 print("3. Search Listings")
                 print("4. Logout")
                 check2 = input("Type one of the numbers: ")
@@ -100,6 +105,27 @@ def main_loop():
                     print(f"Address: {result2!r}")
                     print(f"Email Address: {result!r} ")
                     print(f"Payment Information: {result3!r} ")
+                if check2 == "2":
+                    cursor.execute("SELECT * FROM Listings")
+                    rows = cursor.fetchall()
+                    if len(rows) == 0:
+                        print("No listings found.")
+                    else:
+                        for row in rows:
+                            print()
+                            name = print("Name:", row[0])
+                            print("Description:", row[2])
+                            print("Price: ${:.2f}".format(row[3]))
+                            print("Stock:", row[4])
+                            print("Category:", row[5])
+                            print()
+                    check4 = input("Type the name of the item you'd like to purchase: ")
+                    for row in rows:
+                        if check4 == row[0]:
+                            new_item = Item(row[0], row[1] ,row[2], row[3], row[4], row[5])
+                            cart.addItem(new_item)
+                        else:
+                            continue
                 if check2 == "3":
                     listingname = input("Search for an item listing: ")
                     cursor.execute("SELECT * FROM Listings WHERE itemName = ?", (listingname))
@@ -121,7 +147,9 @@ def main_loop():
 
         elif check1 == "2":
             fella.register(connection)
-
+        elif check1 == "3":
+            connection.close()
+            quit()
 
 
 
