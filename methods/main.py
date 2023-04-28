@@ -53,7 +53,7 @@ def setup_db():
     
     sql_create_cart_table = """ CREATE TABLE IF NOT EXISTS cart (
                                     cartID integer PRIMARY KEY,
-                                    itemID integer listing,
+                                    itemID TEXT,
                                     quantity integer,
                                     FOREIGN KEY (itemID) REFERENCES listing(itemID)
                             );"""
@@ -91,7 +91,9 @@ def main_loop():
                 print("1. Update Profile content")
                 print("2. Show listings")
                 print("3. Search Listings")
-                print("4. Logout")
+                print("4. View Cart")
+                print("5. Order History")
+                print("6. Logout")
                 check2 = input("Type one of the numbers: ")
                 if check2 == "1":
                     email = cursor.execute("SELECT email FROM Customer WHERE username = ? AND password = ?", (fella.getUsrname(), fella.getPass()))
@@ -120,10 +122,11 @@ def main_loop():
                             print("Category:", row[5])
                             print()
                     check4 = input("Type the name of the item you'd like to purchase: ")
+                    check5 = input("Type item quanitity: ")
                     for row in rows:
                         if check4 == row[0]:
-                            new_item = Item(row[0], row[1] ,row[2], row[3], row[4], row[5])
-                            cart.addItem(new_item)
+                            new_item = Item(row[0], row[1] ,row[2], row[3], check5, row[5])
+                            cart.addItem(new_item.getitemName(), new_item.getitemID(), new_item.getitemDesc(), new_item.getitemPrice(), new_item.getitemStock(), new_item.getitemCategory())
                         else:
                             continue
                 if check2 == "3":
@@ -143,13 +146,30 @@ def main_loop():
                             print("Category:", row[5])
                             print()
                 if check2 == "4":
-                    break
+                    clear()
+                    cursor.execute("SELECT * FROM cart")
+                    print(fella.getUsrname() + "'s cart\n")
+                    rows = cursor.fetchall()
+                    if len(rows) == 0:
+                        print("Your cart is empty.")
+                    else:
+                        for row in rows:
+                                print("Name:", row[1])
+                                print("Quantity:", row[2])
+                    rmv_item = input("Would you like to remove an item? If so, type the name, if you wish to go back, type 'b'. ")
+                    if rmv_item == 'b':
+                        continue
+                    else:
+                        for row in rows:
+                            if rmv_item == row[1]:
+                                cart.removeItem(rmv_item)
+                    
 
         elif check1 == "2":
             fella.register(connection)
         elif check1 == "3":
             connection.close()
-            quit()
+            exit()
 
 
 

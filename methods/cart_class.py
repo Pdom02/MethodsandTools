@@ -1,6 +1,7 @@
 import sqlite3
 import getpass
 import os
+from Item_class import Item
 
 
 import sqlite3
@@ -12,9 +13,10 @@ class ShoppingCart:
         self.cursor = self.conn.cursor()
         self.cursor.execute('CREATE TABLE IF NOT EXISTS items (itemName TEXT, itemID TEXT, itemDesc TEXT, itemPrice REAL, itemStock INTEGER, itemCategory TEXT)')
     
-    def addItem(self, item):
+    def addItem(self, itemName, itemID, itemDesc, itemPrice, itemStock, itemCategory):
+        item = Item(itemName, itemID, itemDesc, itemPrice, itemStock, itemCategory)
         self.items.append(item)
-        self.cursor.execute('INSERT INTO items VALUES (?, ?, ?, ?, ?, ?)', (item.itemName, item.itemID, item.itemDesc, item.itemPrice, item.itemStock, item.itemCategory))
+        self.cursor.execute('INSERT INTO cart (itemID, quantity) VALUES (?, ?)', (item.getitemName(), itemStock))
         self.conn.commit()
         print("Item added to cart and database.")
     
