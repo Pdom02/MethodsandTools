@@ -49,13 +49,23 @@ class ShoppingCart:
                     print("Item ID: ", row[0])
                     print("Name:", row[1])
                     print("Quantity:", row[2])
-            rmv_item = int(input("Would you like to remove an item? If so, type the item ID, if you wish to go back, type '0'. "))
-            if rmv_item == 0:
+            
+            print("\n0. Return")
+            print("1. Remove an item from cart")
+            print("2. Checkout\n")
+            choice = int(input("Enter your choice: "))
+            if choice == 0:
                 return
-            else:
-                for row in rows:
-                    if rmv_item == row[0]:
-                        self.removeItem(rmv_item)
+            elif choice == 1:
+                rmv_item = int(input("Enter the item ID of the item that you would like to remove from the cart\nIf you would like to go back, enter '0': "))
+                if rmv_item == 0:
+                    return
+                else:
+                    for row in rows:
+                        if rmv_item == row[0]:
+                            self.removeItem(rmv_item)
+            elif choice == 2:
+                self.checkout()
     
     def updateQuantity(self, itemID, newStock):
         for item in self.items:
@@ -74,9 +84,23 @@ class ShoppingCart:
             total += item.getitemPrice()
         return total
     
+    # def checkout(self):
+    #     self.items.clear()
+    #     self.cursor.execute('DELETE FROM items')
+    #     self.conn.commit()
+    #     print("Cart cleared and items purchased.")
     def checkout(self):
+        for item in self.items:
+        # Update the stock of each item in the database
+            self.cursor.execute('UPDATE Listings SET itemStock = itemStock - ? WHERE itemName = ?', (item.getitemStock(), item.getitemName()))
+            self.conn.commit()
+
+    # Clear the cart
         self.items.clear()
-        self.cursor.execute('DELETE FROM items')
+        self.cursor.execute("DELETE FROM cart")
+    # Commit the changes to the database
         self.conn.commit()
+    
         print("Cart cleared and items purchased.")
+
 
