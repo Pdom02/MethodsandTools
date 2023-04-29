@@ -4,6 +4,7 @@ import os
 from user_class import User
 from Item_class import Item
 from cart_class import ShoppingCart
+from store_class import Store
 
 def clear():
     if os.name == 'nt':
@@ -57,6 +58,14 @@ def setup_db():
                                     quantity integer
                             );"""
     
+    sql_create_orders_table = """ CREATE TABLE IF NOT EXISTS orders (
+                                    orderID PRIMARY KEY,
+                                    itemName TEXT,
+                                    itemStock INTEGER,
+                                    customerID INTEGER,
+                                    FOREIGN KEY (customerID) REFERENCES customer (customerID)
+                            );"""
+    
     connection = sqlite3.connect("buyerschoice.db")
 
     if connection is not None:
@@ -66,11 +75,16 @@ def setup_db():
         create_table(connection, sql_create_item_table)
         #creates cart table
         create_table(connection, sql_create_cart_table)
+        #creates orders table
+        create_table(connection, sql_create_orders_table)
 
 def main_loop():
     setup_db()
     connection = sqlite3.connect("buyerschoice.db")
     cursor = connection.cursor()
+    adminID = "admin"
+    adminPass = "123admin"
+    adminguy = Store(adminID, adminPass)
     fella = User(connection)
     cart = ShoppingCart(connection)
 
@@ -79,7 +93,8 @@ def main_loop():
         print("Welcome to buyers choice!\n")
         print("1. Login")
         print("2. Register")
-        print("3. Exit")
+        print("3. Admin Portal")
+        print("4. Exit")
         check1 = input("Type one of the numbers: ")
         if check1 == "1":
             clear()
@@ -92,7 +107,8 @@ def main_loop():
                 print("3. Search Listings")
                 print("4. View Cart")
                 print("5. Order History")
-                print("6. Logout")
+                print("6. Checkout")
+                print("7. Logout")
                 check2 = input("Type one of the numbers: ")
                 if check2 == "1":
                     email = cursor.execute("SELECT email FROM Customer WHERE username = ? AND password = ?", (fella.getUsrname(), fella.getPass()))
@@ -127,6 +143,7 @@ def main_loop():
                             new_item = Item(row[0], row[1] ,row[2], row[3], check5, row[5])
                             cart.addItem(new_item.getitemName(), new_item.getitemID(), new_item.getitemDesc(), new_item.getitemPrice(), new_item.getitemStock(), new_item.getitemCategory())
                         else:
+                            print("Please enter a proper item name")
                             continue
                 if check2 == "3":
                     listingname = input("Search for an item listing: ")
@@ -146,13 +163,76 @@ def main_loop():
                             print()
                 if check2 == "4":
                     cart.viewCart()
-                if check2 == "6":
+                if check2 == "7":
                     break
                     
 
         elif check1 == "2":
             fella.register(connection)
         elif check1 == "3":
+            username = input("Username: ")
+            password = getpass.getpass("Passowrd: ")
+            if (username == adminguy.getadminID()) & (password == adminguy.getadminPass()):
+                while(1):
+                    clear()
+                    print("Admin Panel")
+                    print("1. View Listings")
+                    print("2. View Accounts")
+                    print("3. Logout")
+                    admin_choice = input("Type the number of the option you want to select: ")
+                    if admin_choice == '1':
+                        cursor.execute("SELECT * FROM Listings")
+                        rows = cursor.fetchall()
+                        if len(rows) == 0:
+                            print("No listings found.")
+                        else:
+                            for row in rows:
+                                print()
+                                print("Name:", row[0])
+                                print("ID: ", row[1])
+                                print("Description:", row[2])
+                                print("Price: ${:.2f}".format(row[3]))
+                                print("Stock:", row[4])
+                                print("Category:", row[5])
+                                print()
+                        rmv_choice = input("Type the itemID that you wish to remove, or type 'b' to go back: ")
+                        if rmv_choice == 'b':
+                            continue
+                        else:
+                            for row in rows:
+                                if rmv_choice == str(row[1]):
+                                    cursor.execute("DELETE FROM Listings WHERE item_id=?", (row[1], ))
+                                    print("Item deleted")
+                                    connection.commit()
+                    if admin_choice == '2':
+                        cursor.execute("SELECT * FROM Customer")
+                        rows = cursor.fetchall()
+                        if len(rows) == 0:
+                            print("No customers in DB")
+                        else:
+                            for row in rows:
+                                print()
+                                print("Username: ", row[2])
+                                print("Full name: ", row[0], row[1])
+                                print("ID Num: ", row[5])
+                                print()
+                            customer_rmv = input("Type the ID Num for the account you wish to remove, or type 'b' to go back: ")
+                            if customer_rmv == 'b':
+                                continue
+                            else:
+                                for row in rows:
+                                    if customer_rmv == str(row[5]):
+                                        cursor.execute("DELETE FROM Customer WHERE customerID=?", (row[5], ))
+                                        print("Item deleted")
+                                        connection.commit()
+                    if admin_choice == '3':
+                        break
+                    
+            else:
+                print("Invalid credentials...")
+                continue
+
+        elif check1 == "4":
             connection.close()
             exit()
 
