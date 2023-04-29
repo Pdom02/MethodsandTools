@@ -121,8 +121,14 @@ class User():
                         self.setUsrname(username)
                         password = getpass.getpass("Please enter your Password: ")
                         self.setPass(password)
-                        cursor.execute("SELECT * FROM Customer WHERE username = ? AND password = ?", (username, password))
+
+                        cursor.execute("SELECT * FROM Customer WHERE username = ? AND password = ?", (username, password,))
                         result = cursor.fetchall()
+                        cursor.execute('SELECT customerID FROM Customer WHERE username = ? AND password = ?', (username, password,))
+                        id = cursor.fetchone()
+                        print(result)
+                        #id = result[5]
+                        self.setID(id)
                         if result:
                                 print("Accepted")
                                 break

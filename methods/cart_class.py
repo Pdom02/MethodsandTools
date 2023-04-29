@@ -2,21 +2,26 @@ import sqlite3
 import getpass
 import os
 from Item_class import Item
+from user_class import User
 
 
 import sqlite3
 
 class ShoppingCart:
-    def __init__(self,connection):
+    def __init__(self,connection, fella):
         self.items = []
         self.conn = connection
         self.cursor = self.conn.cursor()
+        self.fella = fella
         self.cursor.execute('CREATE TABLE IF NOT EXISTS items (itemName TEXT, itemID TEXT, itemDesc TEXT, itemPrice REAL, itemStock INTEGER, itemCategory TEXT)')
     
-    def addItem(self, itemName, itemID, itemDesc, itemPrice, itemStock, itemCategory):
+    def addItem(self, itemName, itemID, itemDesc, itemPrice, itemStock, itemCategory, username):
         item = Item(itemName, itemID, itemDesc, itemPrice, itemStock, itemCategory)
+    
+        self.cursor.execute("SELECT customerID FROM Customer WHERE username = ?", (username, ))
+        custID = self.cursor.fetchone()
         self.items.append(item)
-        self.cursor.execute('INSERT INTO cart (itemID, quantity) VALUES (?, ?)', (itemName, itemStock))
+        self.cursor.execute('INSERT INTO cart (itemName, quantity, customerID) VALUES (?,? ,?)', (itemName, int(itemStock), custID[0], ))
         self.conn.commit()
         print("Item added to cart and database.")
 
@@ -34,15 +39,12 @@ class ShoppingCart:
         print("Item removed from cart and database.")
 
     
-    def viewCart(self):
-        if not self.items:
-            print("Cart is empty.")
-            return
-        else:
-            self.cursor.execute("SELECT * FROM cart")
+    def viewCart(self, userID):
+            self.cursor.execute("SELECT * FROM cart WHERE customerID = ?", (userID))
             rows = self.cursor.fetchall()
             if len(rows) == 0:
                 print("Your cart is empty.")
+                return
             else:
                 for row in rows:
                     print()
@@ -65,13 +67,13 @@ class ShoppingCart:
                         if rmv_item == row[0]:
                             self.removeItem(rmv_item)
             elif choice == 2:
-                self.checkout()
+                self.checkout(userID)
     
     def updateQuantity(self, itemID, newStock):
         for item in self.items:
             if item.getitemID() == itemID:
                 item.setitemStock(newStock)
-                self.cursor.execute('UPDATE items SET itemStock = ? WHERE itemID = ?', (newStock, itemID))
+                self.cursor.execute('UPDATE items SET itemStock = ? WHERE itemName = ?', (newStock, itemID))
                 self.conn.commit()
                 print("Quantity updated in cart and database.")
                 break
@@ -84,31 +86,28 @@ class ShoppingCart:
             total += item.getitemPrice()
         return total
     
-    def orderHist(self, hist):
-        self.hist = []
-        self.cursor.execute("SELECT * FROM cart")
+    def orderHist(self, userID):
+        
+        self.cursor.execute("SELECT * FROM orders WHERE customerID = ?", (userID))
         hist = self.cursor.fetchall()
+        print("---Order History---")
+        print()
         for order in hist:
-            print(f"ItemID: {order[0]}\nName: {order[1]}\nQuantity: {order[2]}\n")        
+            print(f"Name: {order[1]}\nQuantity: {order[2]}\n")        
         self.conn.commit()
         
-    # def checkout(self):
-    #     self.items.clear()
-    #     self.cursor.execute('DELETE FROM items')
-    #     self.conn.commit()
-    #     print("Cart cleared and items purchased.")
-    def checkout(self):
-        for item in self.items:
-        # Update the stock of each item in the database
-            self.cursor.execute('UPDATE Listings SET itemStock = itemStock - ? WHERE itemName = ?', (item.getitemStock(), item.getitemName()))
+   
+    def checkout(self, userID):
+        self.cursor.execute("SELECT * FROM cart WHERE customerID = ?", (userID))
+        stocks = self.cursor.fetchall()
+        for stock in stocks:
+            self.cursor.execute('INSERT INTO orders (itemName, itemStock, customerID) VALUES (?, ?, ?)', (stock[1], stock[2], stock[3]))
+            self.cursor.execute('UPDATE Listings SET itemStock = itemStock - ? WHERE itemName = ?', (stock[2], stock[1]))
             self.conn.commit()
-
-    # Clear the cart
         self.items.clear()
         self.cursor.execute("DELETE FROM cart")
-    # Commit the changes to the database
         self.conn.commit()
-    
         print("Cart cleared and items purchased.")
+        
 
 

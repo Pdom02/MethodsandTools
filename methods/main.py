@@ -26,7 +26,7 @@ def create_table(conn, create_table_sql):
         print(e)
 
 def setup_db():
-    database = r"C:\\Users\\Phillip Dominguez\\Desktop\\methods_tools\\MethodsandTools\\methods\\buyerschoice.db"
+    database = r"home\\brentts\\Documents\\GitHub\\MethodsandTools\\methods\\buyerschoice.db"
 
     sql_create_customer_table = """ CREATE TABLE IF NOT EXISTS customer (
                                     firstname text,
@@ -36,9 +36,6 @@ def setup_db():
                                     address	text,
                                     customerID integer PRIMARY KEY,
                                     email text,
-                                    payHis integer,
-                                    orderHis integer,
-                                    order_info integer,
                                     payinfo	text,
                                     shippingaddress text
                                 );"""
@@ -54,7 +51,17 @@ def setup_db():
     sql_create_cart_table = """ CREATE TABLE IF NOT EXISTS cart (
                                     cartID integer PRIMARY KEY,
                                     itemName TEXT,
-                                    quantity integer
+                                    quantity integer,
+                                    customerID numeric,
+                                    FOREIGN KEY (customerID) REFERENCES Customer (customerID)
+                            );"""
+    
+    sql_create_orders_table = """ CREATE TABLE IF NOT EXISTS orders (
+                                    orderID PRIMARY KEY,
+                                    itemName TEXT,
+                                    itemStock integer,
+                                    customerID integer,
+                                    FOREIGN KEY (customerID) REFERENCES Customer (customerID)
                             );"""
     
     connection = sqlite3.connect("buyerschoice.db")
@@ -66,13 +73,15 @@ def setup_db():
         create_table(connection, sql_create_item_table)
         #creates cart table
         create_table(connection, sql_create_cart_table)
+        #creates orders table
+        create_table(connection, sql_create_orders_table)
 
 def main_loop():
     setup_db()
     connection = sqlite3.connect("buyerschoice.db")
     cursor = connection.cursor()
     fella = User(connection)
-    cart = ShoppingCart(connection)
+    cart = ShoppingCart(connection, fella)
 
     quit = 0
     while(1):
@@ -125,7 +134,7 @@ def main_loop():
                     for row in rows:
                         if check4 == row[0]:
                             new_item = Item(row[0], row[1] ,row[2], row[3], check5, row[5])
-                            cart.addItem(new_item.getitemName(), new_item.getitemID(), new_item.getitemDesc(), new_item.getitemPrice(), new_item.getitemStock(), new_item.getitemCategory())
+                            cart.addItem(new_item.getitemName(), new_item.getitemID(), new_item.getitemDesc(), new_item.getitemPrice(), new_item.getitemStock(), new_item.getitemCategory(), fella.getUsrname())
                         else:
                             continue
                 if check2 == "3":
@@ -145,7 +154,10 @@ def main_loop():
                             print("Category:", row[5])
                             print()
                 if check2 == "4":
-                    cart.viewCart()
+                    cart.viewCart(fella.getID())
+                if check2 == "5":
+                    clear()
+                    cart.orderHist(fella.getID())
                 if check2 == "6":
                     break
                     
