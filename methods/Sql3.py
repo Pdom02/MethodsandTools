@@ -169,7 +169,16 @@ class User:
                                 cursor.execute(query, paypkg )
                                 connection.commit()
                         
-                
+        def delete(self):
+                dlt = input("Do you wish to delete? Y/n?")
+                if dlt == "Y":
+                        username = custmr.getUsrname()
+                        cursor.execute("SELECT CustomerID FROM customer WHERE Username = ?", (username))
+                        ID = cursor.fetchone()
+                        cursor.execute("DELETE FROM customer WHERE CustomerID = ?",[ID])
+                        connection.commit()
+                else:
+                        print("Failed to delete")
                
 
 custmr = User()
@@ -212,7 +221,8 @@ while(quit != 0):
         elif urs == "5":
                 custmr.login()
         elif urs == "6":
-                break
+                ID = 2
+                custmr.delete()
 
                 
 
