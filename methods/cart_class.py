@@ -84,6 +84,14 @@ class ShoppingCart:
             total += item.getitemPrice()
         return total
     
+    def orderHist(self, hist):
+        self.hist = []
+        self.cursor.execute("SELECT * FROM cart")
+        hist = self.cursor.fetchall()
+        for order in hist:
+            print(f"ItemID: {order[0]}\nName: {order[1]}\nQuantity: {order[2]}\n")        
+        self.conn.commit()
+        
     # def checkout(self):
     #     self.items.clear()
     #     self.cursor.execute('DELETE FROM items')
