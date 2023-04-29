@@ -84,7 +84,7 @@ def main_loop():
         if check1 == "1":
             clear()
             fella.login(cursor)
-            clear()
+            
             while(quit != 1):
                 print("Welcome "  + fella.getUsrname())
                 print("1. Update Profile content")
@@ -145,23 +145,27 @@ def main_loop():
                             print("Category:", row[5])
                             print()
                 if check2 == "4":
-                    clear()
-                    cursor.execute("SELECT * FROM cart")
-                    print(fella.getUsrname() + "'s cart\n")
-                    rows = cursor.fetchall()
-                    if len(rows) == 0:
-                        print("Your cart is empty.")
-                    else:
-                        for row in rows:
-                                print("Name:", row[1])
-                                print("Quantity:", row[2])
-                    rmv_item = input("Would you like to remove an item? If so, type the name, if you wish to go back, type 'b'. ")
-                    if rmv_item == 'b':
-                        continue
-                    else:
-                        for row in rows:
-                            if rmv_item == row[1]:
-                                cart.removeItem(rmv_item)
+                    cart.viewCart()
+                    
+                    # clear()
+                    # cursor.execute("SELECT * FROM cart")
+                    # print(fella.getUsrname() + "'s cart\n")
+                    # rows = cursor.fetchall()
+                    # if len(rows) == 0:
+                    #     print("Your cart is empty.")
+                    # else:
+                    #     for row in rows:
+                    #             print("Name:", row[1])
+                    #             print("Quantity:", row[2])
+                    # rmv_item = input("Would you like to remove an item? If so, type the name, if you wish to go back, type 'b'. ")
+                    # if rmv_item == 'b':
+                    #     continue
+                    # else:
+                    #     for row in rows:
+                    #         if rmv_item == row[1]:
+                    #             cart.removeItem(rmv_item)
+                if check2 == "6":
+                    break
                     
 
         elif check1 == "2":

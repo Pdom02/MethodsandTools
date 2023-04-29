@@ -115,15 +115,19 @@ class User():
                 namepkg = (self.getAddy(), self.getEmail(), self.getShpAddy())
                 return namepkg                
         
-        def login(self,cursor):
-                username = input("Please enter your Username: ")
-                self.setUsrname(username)
-                password = getpass.getpass("Please enter your Password: ")
-                self.setPass(password)
-                try:
+        def login(self, cursor):
+                while True:
+                        username = input("Please enter your Username: ")
+                        self.setUsrname(username)
+                        password = getpass.getpass("Please enter your Password: ")
+                        self.setPass(password)
                         cursor.execute("SELECT * FROM Customer WHERE username = ? AND password = ?", (username, password))
-                        print("Accepted")
-                except:
-                        print("Wrong username or password...")
+                        result = cursor.fetchall()
+                        if result:
+                                print("Accepted")
+                                break
+                        else:
+                                print("Wrong username or password...")
+                
                 
   
