@@ -53,9 +53,8 @@ def setup_db():
     
     sql_create_cart_table = """ CREATE TABLE IF NOT EXISTS cart (
                                     cartID integer PRIMARY KEY,
-                                    itemID TEXT,
-                                    quantity integer,
-                                    FOREIGN KEY (itemID) REFERENCES listing(itemID)
+                                    itemName TEXT,
+                                    quantity integer
                             );"""
     
     connection = sqlite3.connect("buyerschoice.db")

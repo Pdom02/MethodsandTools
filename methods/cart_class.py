@@ -16,20 +16,21 @@ class ShoppingCart:
     def addItem(self, itemName, itemID, itemDesc, itemPrice, itemStock, itemCategory):
         item = Item(itemName, itemID, itemDesc, itemPrice, itemStock, itemCategory)
         self.items.append(item)
-        self.cursor.execute('INSERT INTO cart (itemID, quantity) VALUES (?, ?)', (item.getitemName(), itemStock))
+        self.cursor.execute('INSERT INTO cart (itemName, quantity) VALUES (?, ?)', (itemName, itemStock))
         self.conn.commit()
         print("Item added to cart and database.")
-    
-    def removeItem(self, itemID):
+    def removeItem(self, itemName):
+        print(f"Number of items in cart: {len(self.items)}")
         for item in self.items:
-            if item.getitemID() == itemID:
+            print("I'm in the for loop")
+            if item.getitemName() == itemName:
                 self.items.remove(item)
-                self.cursor.execute('DELETE FROM items WHERE itemID = ?', (itemID,))
+                self.cursor.execute('DELETE FROM cart WHERE itemID = ?', (itemName,))
                 self.conn.commit()
                 print("Item removed from cart and database.")
                 break
-        else:
-            print("Item not found in cart.")
+            else:
+                print("Item not found in cart.")
     
     def viewCart(self):
         if not self.items:
