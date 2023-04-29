@@ -56,6 +56,8 @@ def setup_db():
                                     cartID integer PRIMARY KEY,
                                     itemName TEXT,
                                     quantity integer
+                                    customerID integer,
+                                    FOREIGN KEY (customerID) REFERENCES customer (customerID)
                             );"""
     
     sql_create_orders_table = """ CREATE TABLE IF NOT EXISTS orders (
@@ -185,6 +187,9 @@ def main_loop():
                         rows = cursor.fetchall()
                         if len(rows) == 0:
                             print("No listings found.")
+                            goback = input("Type 'b' to go back: ")
+                            if goback == 'b':
+                                continue
                         else:
                             for row in rows:
                                 print()
@@ -199,16 +204,15 @@ def main_loop():
                         if rmv_choice == 'b':
                             continue
                         else:
-                            for row in rows:
-                                if rmv_choice == str(row[1]):
-                                    cursor.execute("DELETE FROM Listings WHERE item_id=?", (row[1], ))
-                                    print("Item deleted")
-                                    connection.commit()
+                            adminguy.removeListing(connection, cursor, rmv_choice)
                     if admin_choice == '2':
                         cursor.execute("SELECT * FROM Customer")
                         rows = cursor.fetchall()
                         if len(rows) == 0:
                             print("No customers in DB")
+                            goback = input("Type 'b' to go back: ")
+                            if goback == 'b':
+                                continue
                         else:
                             for row in rows:
                                 print()
@@ -220,11 +224,7 @@ def main_loop():
                             if customer_rmv == 'b':
                                 continue
                             else:
-                                for row in rows:
-                                    if customer_rmv == str(row[5]):
-                                        cursor.execute("DELETE FROM Customer WHERE customerID=?", (row[5], ))
-                                        print("Item deleted")
-                                        connection.commit()
+                                adminguy.removeAccount(connection, cursor, customer_rmv)
                     if admin_choice == '3':
                         break
                     

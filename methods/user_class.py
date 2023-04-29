@@ -1,5 +1,7 @@
 import getpass
 import sqlite3
+from cart_class import ShoppingCart
+
 
 class User():
         #constructor
@@ -13,7 +15,6 @@ class User():
                 self.address = ""
                 self.shpaddy = ""
                 self.email = ""
-
                 self.UsrID =  0
 
         # USERNAME AND PASSWROD
