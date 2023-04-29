@@ -13,7 +13,7 @@ class User():
                 self.address = ""
                 self.shpaddy = ""
                 self.email = ""
-
+                self.payInfo = 0
                 self.UsrID =  0
 
         # USERNAME AND PASSWROD
@@ -71,6 +71,13 @@ class User():
         def getEmail(self):
                 return self.email
         
+        #PAYINFO
+        def setPayinfo(self, pay):
+                self.payInfo = pay
+        def getPayinfo(self):
+                return self.payInfo
+                
+        
 
 
         #Controls all of the communication with the database<3
@@ -101,6 +108,35 @@ class User():
                 if review == 'Y':
                       query = ("UPDATE customer SET Firstname = ? ,  Lastname =?, Address = ?, Email = ?, ShippingAddress = ? WHERE Username = ?") 
                       cursor.execute(query,updatepkg)
+
+        def editHistory(self,custmr, cursor, connection):
+                print("EDITING: ")
+                print("1: Shipping Address")
+                print("2: Payment Information")
+                update = input("Which one do you want to update?")
+                if update == "1":
+                        shippingadd = input("Please enter your new shipping address:")
+                        custmr.setShpAddy(shippingadd)
+                        username = custmr.getUsrname()
+                        shppkg = (shippingadd, username)
+                        print(shippingadd)
+                        review = input("Is the information correct? Y or N ")
+                        if review == 'Y':
+                                query = ("UPDATE customer SET shippingaddress = ? WHERE Username = ?")
+                                cursor.execute(query, shppkg )
+                                connection.commit()
+
+                elif update == "2":
+                        payhis = input("Please enter your new payment information:")
+                        custmr.setPayinfo(payhis)
+                        username = custmr.getUsrname()
+                        paypkg = (payhis, username)
+                        print(payhis)
+                        review = input("Is the information correct? Y or N ")
+                        if review == 'Y':
+                                query = ("UPDATE customer SET payinfo = ? WHERE Username = ?")
+                                cursor.execute(query, paypkg )
+                                connection.commit()
         
         def PersInfo(self):
                 Fname = input("Please enter your First name: ")
@@ -126,7 +162,6 @@ class User():
                         result = cursor.fetchall()
                         cursor.execute('SELECT customerID FROM Customer WHERE username = ? AND password = ?', (username, password,))
                         id = cursor.fetchone()
-                        print(result)
                         #id = result[5]
                         self.setID(id)
                         if result:
